@@ -140,52 +140,6 @@ java Benchmark          # speed comparison (about 1 minute)
 java MapExport          # saves the Step 6 scene to map_data.csv
 ```
 
-The charts and `map_demo.png` were drawn from `results.csv` and `map_data.csv` with a plotting tool (matplotlib). The data in them comes from the Java program. You do not need to redraw them to run the project; you can also show the text map in the terminal.
 
----
 
-## PART D. HOW TO DEMONSTRATE IT (about 7 minutes)
 
-### Before the evaluators arrive
-Compile, run `java Tests` once, and have `chart_query_time.png` and `chart_cell_size.png` open. Keep `SpatialHashGrid.java` open in your editor.
-
-### Suggested flow
-
-**1. The problem (45 sec).** "In an emergency every minute counts. If a city has 50,000 ambulances and we check all of them for every accident, that is 50,000 distance calculations per call. I wanted a structure that finds the nearest ambulance without looking at all of them."
-
-**2. The idea, using the text map (1.5 min).** Run `java Main` and scroll to Step 6. "I divide the city into cells. X is the accident. I only searched the cells in brackets. Out of 60 ambulances I checked 5, and still found the true nearest."
-
-**3. How it is stored (1 min).** In `SpatialHashGrid.java` show `colOf`, `rowOf`, `keyOf` and the `cells` HashMap. "Location goes in, cell comes out. Each cell holds a list of ambulances."
-
-**4. The stop rule (1 min).** Show the `nearest` method and read the comment above it. "I search ring by ring and stop only when no unseen cell can contain anything closer, so the answer is exact, not approximate."
-
-**5. Live demo (1.5 min).** Walk through Steps 1 to 5 of the output. Point out the "grid checked 2 of 39 free ambulances" lines. Optionally run `java Main manual` and let an evaluator type any accident location.
-
-**6. Proof (1.5 min).** Show `java Tests` passing, then the benchmark table and `chart_query_time.png`. "Brute force grows with the fleet. The grid stays flat. At 50,000 ambulances it is hundreds of times faster."
-
-**7. Why not a tree + limitations (1 min).** Use the table in section 3 and the limitations in section 7.
-
-### Likely viva questions and answers
-
-**Q: Why a grid and not a Quadtree?** Ambulances move all the time. In a grid, a move is a small HashMap update. In a tree it is delete + re-insert and possibly rebalancing.
-
-**Q: How do you choose the cell size?** Roughly the average gap between ambulances, city width / sqrt(n). Too big and you scan many ambulances per cell (it degrades to brute force). Too small and you scan many empty cells. Show `chart_cell_size.png`.
-
-**Q: What if the nearest ambulance is in a neighbouring cell?** That is why the search goes in rings and has a stop rule. It keeps expanding until no closer ambulance is possible.
-
-**Q: What is the worst case?** If all ambulances sit in one cell it behaves like brute force. If almost everyone is busy, the search has to expand through many empty rings. Both are limitations.
-
-**Q: Why is it called a hash structure?** The key is the cell number, and `HashMap` hashes it to find the bucket in O(1) average.
-
-**Q: How does `HashMap` work?** It turns the key into a number (hash), uses that number to jump straight to a bucket, and stores the value there. That is why lookups do not depend on how many entries there are.
-
-**Q: Is the distance real?** It is straight-line on a flat map. In practice the grid would shortlist candidates, and a graph algorithm such as Dijkstra would compute road distance.
-
-**Q: How do you know it is correct?** 300 randomized tests against a brute-force version, including moves, removals, negative coordinates and border cases.
-
-**Q: Time and space complexity?** Insert, remove and move are O(1) average. Nearest is about O(1) for a well-chosen cell size (O(n) worst case). Space is O(n).
-
-### Tips
-- Be ready to explain every line of `SpatialHashGrid.java`. It is short on purpose.
-- If you change anything, recompile and rerun `java Tests` before presenting.
-- If you do not know an answer, say what you would do to find out. That reads better than guessing.
